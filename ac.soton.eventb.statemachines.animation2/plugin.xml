@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.gmf.runtime.diagram.ui.editpolicyProviders">
       <editpolicyProvider
-            class="ac.soton.eventb.statemachines.animation.policies.TransitionEditPolicyProvider">
+            class="ac.soton.eventb.statemachines.animation2.policies.TransitionEditPolicyProvider">
          <Priority
                name="Lowest">
          </Priority>
@@ -22,12 +22,6 @@
       </editpolicyProvider>
    </extension>
    <extension
-         point="de.prob.core.animation">
-      <listener
-            class="ac.soton.eventb.statemachines.animation.listeners.AnimationListener">
-      </listener>
-   </extension>
-   <extension
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="true"
@@ -36,11 +30,29 @@
                commandId="ac.soton.eventb.statemachines.animation.AnimateAction"
                icon="icons/Animate.png"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activePartId">
+                  <equals
+                        value="ac.soton.eventb.statemachines.diagram.part.StatemachinesDiagramEditorID">
+                  </equals>
+               </with>
+            </visibleWhen>
          </command>
          <command
                commandId="ac.soton.eventb.statemachines.animation.StopAction"
                icon="icons/StopAnimation.png"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activePartId">
+                  <equals
+                        value="ac.soton.eventb.statemachines.diagram.part.StatemachinesDiagramEditorID">
+                  </equals>
+               </with>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
@@ -63,30 +75,36 @@
             class="ac.soton.eventb.statemachines.animation2.actions.AnimateAction"
             commandId="ac.soton.eventb.statemachines.animation.AnimateAction">
          <activeWhen>
-            <and>
-               <with
-                     variable="activePartId">
-                  <equals
-                        value="ac.soton.eventb.statemachines.diagram.part.StatemachinesDiagramEditorID">
-                  </equals>
-               </with>
-            </and>
+            <with
+                  variable="ac.soton.eventb.statemachines.animation2.state">
+               <equals
+                     value="stopped">
+               </equals>
+            </with>
          </activeWhen>
       </handler>
       <handler
             class="ac.soton.eventb.statemachines.animation2.actions.StopAction"
             commandId="ac.soton.eventb.statemachines.animation.StopAction">
          <activeWhen>
-            <and>
-               <with
-                     variable="activePartId">
-                  <equals
-                        value="ac.soton.eventb.statemachines.diagram.part.StatemachinesDiagramEditorID">
-                  </equals>
-               </with>
-            </and>
+            <with
+                  variable="ac.soton.eventb.statemachines.animation2.state">
+               <equals
+                     value="started">
+               </equals>
+            </with>
          </activeWhen>
       </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.services">
+      <sourceProvider
+            provider="ac.soton.eventb.statemachines.animation2.AnimationState">
+         <variable
+               name="ac.soton.eventb.statemachines.animation2.active"
+               priorityLevel="workbench">
+         </variable>
+      </sourceProvider>
    </extension>
 
 </plugin>

@@ -23,12 +23,14 @@ import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.services.ISourceProviderService;
 import org.eventb.core.IEventBRoot;
 import org.eventb.emf.core.machine.Machine;
 import org.eventb.emf.core.machine.MachinePackage;
 
 import ac.soton.eventb.statemachines.Statemachine;
 import ac.soton.eventb.statemachines.StatemachinesPackage;
+import ac.soton.eventb.statemachines.animation2.AnimationState;
 import ac.soton.eventb.statemachines.animation2.DiagramAnimator;
 import ac.soton.eventb.statemachines.diagram.part.StatemachinesDiagramEditor;
 
@@ -63,7 +65,7 @@ public class StopAction extends AbstractHandler {
 			for (IEditorReference editorRef : page.getEditorReferences()){
 				IEditorPart editor = editorRef.getEditor(true);
 					
-				if (editor instanceof StatemachinesDiagramEditor && ((StatemachinesDiagramEditor)editor).isAnimating() ){
+				if (editor instanceof StatemachinesDiagramEditor){// && ((StatemachinesDiagramEditor)editor).animating() ){
 	
 					Statemachine statemachine = (Statemachine) ((StatemachinesDiagramEditor)editor).getDiagram().getElement();
 					if (root.equals(AnimateAction.getEventBRoot(statemachine))) {
@@ -106,7 +108,7 @@ public class StopAction extends AbstractHandler {
 						resource.setModified(false);
 	
 						//tell editor that we are no longer animating
-						((StatemachinesDiagramEditor)editor).stopAnimating();
+//						((StatemachinesDiagramEditor)editor).stopAnimating();
 					}
 				}
 			}
@@ -118,6 +120,11 @@ public class StopAction extends AbstractHandler {
 			IWorkbenchPage activePage = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage();
 			if (perspective != null && activePage!=null)	activePage.setPerspective(perspective);
 		}
+		
+		// set animation service state to active
+	    ISourceProviderService sourceProviderService = (ISourceProviderService) HandlerUtil.getActiveWorkbenchWindow(event).getService(ISourceProviderService.class);
+	    AnimationState animationStateService = (AnimationState) sourceProviderService.getSourceProvider(AnimationState.STATE);
+	    animationStateService.setActive(false);
 		
 		return null;
 	}

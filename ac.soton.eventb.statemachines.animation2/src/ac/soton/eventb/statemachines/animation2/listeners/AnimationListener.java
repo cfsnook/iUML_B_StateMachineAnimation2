@@ -7,9 +7,10 @@
  */
 package ac.soton.eventb.statemachines.animation2.listeners;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.util.BasicEList;
@@ -20,50 +21,53 @@ import org.eclipse.emf.transaction.TransactionalEditingDomain;
 import org.eclipse.emf.transaction.util.TransactionUtil;
 import org.eventb.emf.core.EventBNamed;
 import org.eventb.emf.core.machine.Event;
-import org.eventb.emf.core.machine.Machine;
 
 import ac.soton.eventb.statemachines.Statemachine;
 import ac.soton.eventb.statemachines.StatemachinesPackage;
 import ac.soton.eventb.statemachines.Transition;
-import ac.soton.eventb.statemachines.TranslationKind;
 import ac.soton.eventb.statemachines.animation2.DiagramAnimator;
-import de.prob.core.IAnimationListener;
-import de.prob.core.domainobjects.Operation;
-import de.prob.core.domainobjects.State;
-import de.prob.core.domainobjects.Variable;
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.EvalResult;
+//import de.prob.core.IAnimationListener;
+//import de.prob.core.domainobjects.Operation;
+//import de.prob.core.domainobjects.State;
+//import de.prob.core.domainobjects.Variable;
+import de.prob.statespace.IAnimationChangeListener;
+import de.prob.statespace.State;
+import de.prob.statespace.Trace;
 /**
  * Diagram animation listener.
  * 
  * @author vitaly
  *
  */
-public class AnimationListener implements IAnimationListener {
+public class AnimationListener implements IAnimationChangeListener {
 
 	@Override
-	public void currentStateChanged(State currentState, Operation operation) {
+	public void animatorStatus(boolean arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void traceChange(Trace trace, boolean arg1) {
 		DiagramAnimator animator = DiagramAnimator.getAnimator();
 		
 		if (animator.isRunning()) {
-			//TransactionalEditingDomain editingDomain = TransactionUtil.getEditingDomain(machine.eResource()); //getEditingDomain(machine);
-			for(Statemachine statemachine : animator.getRootStatemachines()){	
-				TransactionalEditingDomain editingDomain = TransactionUtil.getEditingDomain(statemachine);
-				Map<String, Variable> variables = currentState.getValues();
-				List<Operation> operations = currentState.getEnabledOperations();
-				Map<String, EList<Operation>> enabledOperations = new HashMap<String, EList<Operation>>();
+			animator.setTrace(trace);
 
+			for(Statemachine statemachine : animator.getRootStatemachines()){
+				// ProB state
+//				Map<IEvalElement, AbstractEvalResult> values = trace.getCurrentState().getValues();	//XXX: may be faster than using trace.eval() for each variable individually
+				Set<de.prob.statespace.Transition> transitions = trace.getNextTransitions(true);
+
+				Map<String, EList<de.prob.statespace.Transition>> enabledOps = getEnabledOps(transitions);
+				Map<String, Object> activeStates = getActiveStates(animator, statemachine, trace.getCurrentState());
+				boolean lifted = statemachine.getInstances() != null;
+
+				TransactionalEditingDomain editingDomain = TransactionUtil.getEditingDomain(statemachine);
 				CompoundCommand cc = new CompoundCommand();
-	
-				// retrieve information from proB
-				// map of operation names and executable ProB operations
-				for (Operation op : operations) {
-					if (!enabledOperations.containsKey(op.getName()))
-						enabledOperations.put(op.getName(), new BasicEList<Operation>());
-					enabledOperations.get(op.getName()).add(op);
-				}
-				// map of active states - with instances currently in that state if lifted, or just TRUE if not lifted
-				Map<String, Object> activeStates = getActiveStates(animator,statemachine, variables);
 				
-				boolean lifted = statemachine.getInstances()!=null;
 				// update states
 				for (EObject object : statemachine.getAllContained(StatemachinesPackage.Literals.STATE, true)) {
 					if (object == null) continue;
@@ -80,43 +84,75 @@ public class AnimationListener implements IAnimationListener {
 					cc.append(SetCommand.create(editingDomain, object, StatemachinesPackage.Literals.STATE__ACTIVE_INSTANCES, ins));
 					cc.append(SetCommand.create(editingDomain, object, StatemachinesPackage.Literals.STATE__ACTIVE, active));					
 				}
-
-				//update transitions so we know which are active below
+				
+				// update transitions so we know which are active below
 				for (EObject object : statemachine.getAllContained(StatemachinesPackage.Literals.TRANSITION, true)) {
 					if (object == null) continue;
+					
 					Transition transition = (Transition) object;
 					// collect enabled operations
-					EList<Operation> ops = new BasicEList<Operation>();
+					EList<de.prob.statespace.Transition> ops = new BasicEList<de.prob.statespace.Transition>();
 					for (Event event : transition.getElaborates()) {
-						if (enabledOperations.containsKey(event.getName()))
-							ops.addAll(enabledOperations.get(event.getName()));
+						if (enabledOps.containsKey(event.getName()))
+							ops.addAll(enabledOps.get(event.getName()));
 					}
 					// set operations
 					cc.append(SetCommand.create(editingDomain, transition, StatemachinesPackage.Literals.TRANSITION__OPERATIONS, ops));
 				}	
 
-				editingDomain.getCommandStack().execute(cc);			
-			}	
+				editingDomain.getCommandStack().execute(cc);		
+			}
 		}
 	}
+
+	/**
+	 * Maps of operation names and executable ProB operations.
+	 * @param transitions
+	 * @return 
+	 */
+	private Map<String, EList<de.prob.statespace.Transition>> getEnabledOps(Set<de.prob.statespace.Transition> transitions) {
+		Map<String, EList<de.prob.statespace.Transition>> ops = new HashMap<String, EList<de.prob.statespace.Transition>>();
+		String name = null;
+		for (de.prob.statespace.Transition t : transitions) {
+			name = t.getName();
+			
+			// in ProB INITIALISATION event is called $initialise_machine
+			if ("$initialise_machine".equals(name))
+				name = "INITIALISATION";
+			
+			if (!ops.containsKey(name))
+				ops.put(name, new BasicEList<de.prob.statespace.Transition>());
+			ops.get(name).add(t);
+		}
+		return ops;
+	}
+
+	/*****************************************************************
+	 * Helper methods
+	 *****************************************************************/
 	
 	/**
+	 * Maps of active states - with instances currently in that state if lifted, or just TRUE if not lifted.
 	 * @param animator
 	 * @param statemachine
-	 * @param variables
-	 * @param type
+	 * @param state 
 	 * @return
 	 */
-	private Map<String,Object> getActiveStates(DiagramAnimator animator, Statemachine statemachine, Map<String, Variable> variables) {
+	private Map<String,Object> getActiveStates(DiagramAnimator animator, Statemachine statemachine, State state) {
+		if (!state.isInitialised())
+			return Collections.emptyMap();
+		
 		//retrieve a map of active states to instances for all state-machine states	
 		Map<String,Object> activeStates = new HashMap<String,Object>();
-		TranslationKind type = statemachine.getTranslation();
-		boolean lifted = statemachine.getInstances()!=null; 
+		boolean lifted = statemachine.getInstances() != null; 
+		AbstractEvalResult eval = null;
 		
-		if (type == TranslationKind.SINGLEVAR) {
+		switch (statemachine.getTranslation()) {
+		case SINGLEVAR:
 			// add state of root statemachine
-			if (variables.containsKey(statemachine.getName())){
-				String smValue = variables.get(statemachine.getName()).getValue();
+			eval = state.eval(statemachine.getName());
+			if (eval != null){
+				String smValue = ((EvalResult) eval).getValue();
 				if (lifted){
 					activeStates.putAll(parseSmFn(smValue));					
 				} else {
@@ -127,8 +163,9 @@ public class AnimationListener implements IAnimationListener {
 			for (EObject object : statemachine.getAllContained(StatemachinesPackage.Literals.STATEMACHINE, true)) {
 				if (object == null) continue;
 				String statemachineName = ((EventBNamed) object).getName();
-				if (variables.containsKey(statemachineName)) {
-					String smValue = variables.get(statemachineName).getValue();
+				eval = state.eval(statemachineName);
+				if (eval != null) {
+					String smValue = ((EvalResult) eval).getValue();
 					if (lifted){
 						activeStates.putAll(parseSmFn(smValue));					
 					} else {
@@ -136,42 +173,42 @@ public class AnimationListener implements IAnimationListener {
 					}
 				}
 			}
-		}
-		
-		//FIXME: REFINEDVAR is no longer being supported - may remove at some time
-		else if (type == TranslationKind.REFINEDVAR) {
-			//find refinement level of this machine
-			Machine m = animator.getMachine();
-			int refinementLevel = 0;
-			while(m.getRefines().size() != 0){
-				m = m.getRefines().get(0);
-				refinementLevel++;
-			}
-			// add state of root statemachine
-			if (variables.containsKey((statemachine.getName() + "_" + refinementLevel))){
-				for(Variable variable : variables.values()){
-					if(variable.getValue().equals(variables.get(statemachine.getName() + "_" + refinementLevel).getValue()) && !variable.getIdentifier().equals(statemachine.getName() + "_" + refinementLevel))
-						activeStates.put(variable.getIdentifier(), "TRUE");
-				}
-			}
-			// add states of all nested statemachines
-			for (EObject object : statemachine.getAllContained(StatemachinesPackage.Literals.STATEMACHINE, true)) {
-				if (object == null) continue;
-				String statemachineName = ((EventBNamed) object).getName() + "_" + refinementLevel;
-				if (variables.containsKey(statemachine))
-					activeStates.put(variables.get(statemachineName).getValue(), "TRUE");
-			}
-			
-		} else if (type == TranslationKind.MULTIVAR) {
+			break;
+//		//FIXME: REFINEDVAR is no longer being supported - may remove at some time
+//		case REFINEDVAR:
+//			//find refinement level of this machine
+//			Machine m = animator.getMachine();
+//			int refinementLevel = 0;
+//			while(m.getRefines().size() != 0){
+//				m = m.getRefines().get(0);
+//				refinementLevel++;
+//			}
+//			// add state of root statemachine
+//			if (variables.containsKey((statemachine.getName() + "_" + refinementLevel))){
+//				for(Variable variable : variables.values()){
+//					if(variable.getValue().equals(variables.get(statemachine.getName() + "_" + refinementLevel).getValue()) && !variable.getIdentifier().equals(statemachine.getName() + "_" + refinementLevel))
+//						activeStates.put(variable.getIdentifier(), "TRUE");
+//				}
+//			}
+//			// add states of all nested statemachines
+//			for (EObject object : statemachine.getAllContained(StatemachinesPackage.Literals.STATEMACHINE, true)) {
+//				if (object == null) continue;
+//				String statemachineName = ((EventBNamed) object).getName() + "_" + refinementLevel;
+//				if (variables.containsKey(statemachine))
+//					activeStates.put(variables.get(statemachineName).getValue(), "TRUE");
+//			}
+//			break;
+		case MULTIVAR:
 			for (EObject object : statemachine.getAllContained(StatemachinesPackage.Literals.STATE, true)) {
 				if (object == null) continue;
 				String stateName = ((ac.soton.eventb.statemachines.State) object).getName();	
-				Variable stateStatusVar = variables.get(stateName);
-				if (stateStatusVar != null){
-					activeStates.put(stateName, stateStatusVar.getValue());					
+				eval = state.eval(stateName);
+				if (eval != null){
+					activeStates.put(stateName, ((EvalResult) eval).getValue());					
 				}
 			}
-		} else {
+			break;
+		default:
 			//un-supported translation kind - do nothing
 		}
 		return activeStates;

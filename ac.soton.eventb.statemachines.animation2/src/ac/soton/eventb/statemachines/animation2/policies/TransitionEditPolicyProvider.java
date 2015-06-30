@@ -7,12 +7,8 @@
  */
 package ac.soton.eventb.statemachines.animation2.policies;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.editpolicies.SelectionEditPolicy;
@@ -23,16 +19,11 @@ import org.eclipse.gmf.runtime.diagram.ui.services.editpolicy.CreateEditPolicies
 import org.eclipse.gmf.runtime.diagram.ui.services.editpolicy.IEditPolicyProvider;
 import org.eclipse.gmf.runtime.notation.View;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eventb.emf.core.machine.Event;
 
 import ac.soton.eventb.statemachines.Transition;
-import ac.soton.eventb.statemachines.animation2.StatemachineAnimationPlugin;
+import ac.soton.eventb.statemachines.animation2.DiagramAnimator;
 import ac.soton.eventb.statemachines.diagram.edit.parts.TransitionEditPart;
 import ac.soton.eventb.statemachines.diagram.edit.parts.TransitionGhostEditPart;
-import de.prob.core.Animator;
-import de.prob.core.command.ExecuteOperationCommand;
-import de.prob.core.domainobjects.Operation;
-import de.prob.exceptions.ProBException;
 
 /**
  * Edit policy that adds animation context menu to enabled transitions.
@@ -49,54 +40,33 @@ public class TransitionEditPolicyProvider implements IEditPolicyProvider {
 			@Override
 			protected void showSelection() {
 				Transition transition = (Transition) ((View) getHost().getModel()).getElement();
-				Animator animator = Animator.getAnimator();
+				DiagramAnimator animator = DiagramAnimator.getAnimator();
 
-				//FIXME: more elaborate check required to test if concrete diagram is animated
 				// if animation running and operations available
-				if (animator.isRunning()
-						&& transition.getOperations() != null 
-						&& !transition.getOperations().isEmpty()) {
+				if (animator.isRunning()) {
+					getHost().getViewer().deselectAll(); 	// deselect the transition ready for next interaction
 					
-					getHost().getViewer().deselectAll(); 	//deselect the transition ready for next interaction
+					List<?> enabled = transition.getOperations();
+					if (enabled.isEmpty())
+						return;
 					
-					List<Operation> enabledOperations = animator.getCurrentState().getEnabledOperations();
-					List<Operation> operations = new ArrayList<Operation>();
-					EList<Event> events = transition.getElaborates();
-//					EList<?> operations = transition.getOperations();
-					for (Operation op : enabledOperations){
-						String opName = op.getName();
-						for (Event ev : events){
-							if (opName.equals(ev.getName()) ){
-								operations.add(op);
-							}	
-						}
-					}
 					// show selection menu
-					PopupMenu menu = new PopupMenu(operations, new LabelProvider() {
+					PopupMenu menu = new PopupMenu(enabled, new LabelProvider() {
 
 						@Override
 						public String getText(Object element) {
-							Operation operation = (Operation) element;
-							List<String> arguments = operation.getArguments();
-							String text = operation.getName() +
-								(arguments == null || arguments.isEmpty() ? "" : " " + arguments.toString());
+							de.prob.statespace.Transition transition = (de.prob.statespace.Transition) element;
+							List<String> params = transition.getParameterPredicates();
+							String text = transition.getName() +
+								(params == null || params.isEmpty() ? "" : " " + params.toString());
 							return text;
 						}});
 					menu.show(getHost().getViewer().getControl());
-					Object operation = menu.getResult();
+					de.prob.statespace.Transition op = (de.prob.statespace.Transition) menu.getResult();
 					
 					// execute selected
-					if (operation != null) {
-						try {
-							ExecuteOperationCommand.executeOperation(animator, (Operation) operation);
-						} catch (ProBException e) {
-									StatemachineAnimationPlugin.getDefault().getLog().log(
-											new Status(IStatus.ERROR,
-													StatemachineAnimationPlugin.PLUGIN_ID,
-													"Execution of ProB operation failed for: " + operation.toString(),
-													e));
-						}
-					}
+					if (op != null)
+						animator.animate(op);
 				}
 			}
 			

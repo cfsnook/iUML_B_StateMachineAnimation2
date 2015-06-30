@@ -29,6 +29,7 @@ import org.eclipse.ui.IPerspectiveRegistry;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.services.ISourceProviderService;
 import org.eventb.core.IEventBRoot;
 import org.eventb.emf.core.EventBElement;
 import org.eventb.emf.core.machine.Machine;
@@ -37,6 +38,7 @@ import org.rodinp.core.IRodinProject;
 import org.rodinp.core.RodinCore;
 
 import ac.soton.eventb.statemachines.Statemachine;
+import ac.soton.eventb.statemachines.animation2.AnimationState;
 import ac.soton.eventb.statemachines.animation2.DiagramAnimator;
 import ac.soton.eventb.statemachines.animation2.StatemachineAnimationPlugin;
 import ac.soton.eventb.statemachines.diagram.part.StatemachinesDiagramEditor;
@@ -71,7 +73,8 @@ public class AnimateAction extends AbstractHandler {
 		IEventBRoot root = getEventBRoot(machine);
 		
 		List<Statemachine> statemachines = new ArrayList<Statemachine>();
-		//Find all the statemachines that are open as diagrams 
+		
+		// Find all the statemachines of the SAME machine that are open as diagrams 
 		// (these must come from the editors as each editor has a different local copy)
 		for(IWorkbenchPage page : HandlerUtil.getActiveWorkbenchWindow(event).getPages()){
 			
@@ -87,8 +90,9 @@ public class AnimateAction extends AbstractHandler {
 		    				editor.doSave(new NullProgressMonitor());
 		    			}
 	    				statemachines.add(statemachine);
-	    				//let the editor know that we are animating so that it doesn't try to save animation artifacts
-			    		((StatemachinesDiagramEditor)editor).startAnimating();
+	    				
+	    				// let the editor know that we are animating so that it doesn't try to save animation artifacts
+//			    		((StatemachinesDiagramEditor)editor).startAnimating();
 			    			
 					}
 		    	}
@@ -113,29 +117,34 @@ public class AnimateAction extends AbstractHandler {
 	    	}
     	}
 
-		try {
+//		try {
 			// run animation
 			DiagramAnimator diagramAnimator = DiagramAnimator.getAnimator();
-			diagramAnimator.start(machine, statemachines, root, bmsFiles);
+			if(diagramAnimator.start(machine, statemachines, root, bmsFiles)) {
+				// set animation service state to active
+			    ISourceProviderService sourceProviderService = (ISourceProviderService) HandlerUtil.getActiveWorkbenchWindow(event).getService(ISourceProviderService.class);
+			    AnimationState animationStateService = (AnimationState) sourceProviderService.getSourceProvider(AnimationState.STATE);
+			    animationStateService.setActive(true);
+			}
 			
-			//switch to a suitable perspective
-			IPerspectiveDescriptor perspective = null;
-			IPerspectiveRegistry registry = PlatformUI.getWorkbench().getPerspectiveRegistry();
-			if (diagramAnimator.isRunningBMotionStudio()){
-				perspective = registry.findPerspectiveWithId(BMS_RUN_PERSPECTIVE_ID);
-			}
-			if (perspective==null){
-				perspective = registry.findPerspectiveWithId(PROB_PERSPECTIVE_ID);
-			}
-			if (perspective != null) {
-				activeEditor.getSite().getPage().setPerspective(perspective);
-				activeEditor.getSite().getPage().setEditorAreaVisible(true);
-			}
-		} catch (ProBException e) {
-			StatemachineAnimationPlugin.getDefault().getLog().log(
-					new Status(IStatus.ERROR, StatemachineAnimationPlugin.PLUGIN_ID,
-							"Animation startup failed for: " , e));
-		}
+//			//switch to a suitable perspective
+//			IPerspectiveDescriptor perspective = null;
+//			IPerspectiveRegistry registry = PlatformUI.getWorkbench().getPerspectiveRegistry();
+//			if (diagramAnimator.isRunningBMotionStudio()){
+//				perspective = registry.findPerspectiveWithId(BMS_RUN_PERSPECTIVE_ID);
+//			}
+//			if (perspective==null){
+//				perspective = registry.findPerspectiveWithId(PROB_PERSPECTIVE_ID);
+//			}
+//			if (perspective != null) {
+//				activeEditor.getSite().getPage().setPerspective(perspective);
+//				activeEditor.getSite().getPage().setEditorAreaVisible(true);
+//			}
+//		} catch (ProBException e) {
+//			StatemachineAnimationPlugin.getDefault().getLog().log(
+//					new Status(IStatus.ERROR, StatemachineAnimationPlugin.PLUGIN_ID,
+//							"Animation startup failed for: " , e));
+//		}
 		return null;
 	}
 
