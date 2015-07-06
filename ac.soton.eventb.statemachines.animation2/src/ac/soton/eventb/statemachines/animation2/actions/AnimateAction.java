@@ -14,20 +14,14 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.workspace.util.WorkspaceSynchronizer;
 import org.eclipse.gmf.runtime.diagram.ui.parts.DiagramEditor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IPerspectiveDescriptor;
-import org.eclipse.ui.IPerspectiveRegistry;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.eventb.core.IEventBRoot;
@@ -40,7 +34,6 @@ import org.rodinp.core.RodinCore;
 import ac.soton.eventb.statemachines.Statemachine;
 import ac.soton.eventb.statemachines.animation2.AnimationState;
 import ac.soton.eventb.statemachines.animation2.DiagramAnimator;
-import ac.soton.eventb.statemachines.animation2.StatemachineAnimationPlugin;
 import ac.soton.eventb.statemachines.diagram.part.StatemachinesDiagramEditor;
 //import de.bmotionstudio.gef.editor.BMotionStudioEditor;
 //import de.prob.exceptions.ProBException;
@@ -53,9 +46,9 @@ import ac.soton.eventb.statemachines.diagram.part.StatemachinesDiagramEditor;
  */
 public class AnimateAction extends AbstractHandler {
 
-	private static final String BMOTION_STUDIO_EXT = "bmso";
-	private static final String BMS_RUN_PERSPECTIVE_ID = "de.bmotionstudio.perspective.run";
-	private static final String PROB_PERSPECTIVE_ID = "de.prob.ui.perspective";
+//	private static final String BMOTION_STUDIO_EXT = "bmso";
+//	private static final String BMS_RUN_PERSPECTIVE_ID = "de.bmotionstudio.perspective.run";
+//	private static final String PROB_PERSPECTIVE_ID = "de.prob.ui.perspective";
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -73,7 +66,7 @@ public class AnimateAction extends AbstractHandler {
 		IEventBRoot root = getEventBRoot(machine);
 		
 		List<Statemachine> statemachines = new ArrayList<Statemachine>();
-		
+		List<StatemachinesDiagramEditor> editors = new ArrayList<StatemachinesDiagramEditor>();
 		// Find all the statemachines of the SAME machine that are open as diagrams 
 		// (these must come from the editors as each editor has a different local copy)
 		for(IWorkbenchPage page : HandlerUtil.getActiveWorkbenchWindow(event).getPages()){
@@ -92,8 +85,8 @@ public class AnimateAction extends AbstractHandler {
 	    				statemachines.add(statemachine);
 	    				
 	    				// let the editor know that we are animating so that it doesn't try to save animation artifacts
-//			    		((StatemachinesDiagramEditor)editor).startAnimating();
-			    			
+			    		((StatemachinesDiagramEditor)editor).startAnimating();
+			    		editors.add((StatemachinesDiagramEditor)editor);
 					}
 		    	}
 				
@@ -141,6 +134,9 @@ public class AnimateAction extends AbstractHandler {
 //				activeEditor.getSite().getPage().setEditorAreaVisible(true);
 //			}
 //		} catch (ProBException e) {
+//			for (StatemachinesDiagramEditor editor : editors){
+//				editor.stopAnimating();
+//			}
 //			StatemachineAnimationPlugin.getDefault().getLog().log(
 //					new Status(IStatus.ERROR, StatemachineAnimationPlugin.PLUGIN_ID,
 //							"Animation startup failed for: " , e));

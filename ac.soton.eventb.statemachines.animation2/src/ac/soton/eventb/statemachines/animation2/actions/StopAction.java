@@ -65,7 +65,7 @@ public class StopAction extends AbstractHandler {
 			for (IEditorReference editorRef : page.getEditorReferences()){
 				IEditorPart editor = editorRef.getEditor(true);
 					
-				if (editor instanceof StatemachinesDiagramEditor){// && ((StatemachinesDiagramEditor)editor).animating() ){
+				if (editor instanceof StatemachinesDiagramEditor && ((StatemachinesDiagramEditor)editor).isAnimating() ){
 	
 					Statemachine statemachine = (Statemachine) ((StatemachinesDiagramEditor)editor).getDiagram().getElement();
 					if (root.equals(AnimateAction.getEventBRoot(statemachine))) {
@@ -108,7 +108,7 @@ public class StopAction extends AbstractHandler {
 						resource.setModified(false);
 	
 						//tell editor that we are no longer animating
-//						((StatemachinesDiagramEditor)editor).stopAnimating();
+						((StatemachinesDiagramEditor)editor).stopAnimating();
 					}
 				}
 			}
