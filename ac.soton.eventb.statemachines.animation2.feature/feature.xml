@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="ac.soton.eventb.statemachines.animation2.feature"
+      label="%featureName"
+      version="0.0.1"
+      provider-name="%providerName"
+      plugin="ac.soton.iumlb.branding">
+
+   <description url="http://www.example.com/description">
+      %description
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <url>
+      <update label="%updateSiteName" url="http://rodin-b-sharp.sourceforge.net/updates/site.xml"/>
+   </url>
+
+   <requires>
+      <import feature="de.prob2.feature" version="3.0.7.201411260843" match="compatible"/>
+      <import feature="ac.soton.eventb.statemachines.feature" version="3.0.0" match="compatible"/>
+   </requires>
+
+   <plugin
+         id="ac.soton.eventb.statemachines.animation2"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
