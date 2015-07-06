@@ -115,20 +115,6 @@ public class DiagramAnimator {
 	public boolean start(Machine machine, List<Statemachine> rootStatemachines, IEventBRoot root, List<IFile> bmsFiles) {
 		this.machine = machine;
 		this.rootStatemachines = rootStatemachines;
-//		for (final Statemachine sm : rootStatemachines){
-//			TransactionalEditingDomain editingDomain = TransactionUtil.getEditingDomain(sm);
-//			final Attribute animatingAttribute = CoreFactory.eINSTANCE.createAttribute();
-//			animatingAttribute.setType(AttributeType.BOOLEAN);
-//			animatingAttribute.setValue(true);
-//			editingDomain.getCommandStack().execute(
-//				new RecordingCommand(editingDomain){
-//					@Override
-//					protected void doExecute() {
-//						sm.getAttributes().put("ac.soton.eventb.statemachines.animation2", animatingAttribute);
-//					}	
-//				}
-//			);
-//		}
 		System.out.println("Starting ProB 2 for " + machine);
 
 		return startProB2(root);
@@ -197,17 +183,6 @@ public class DiagramAnimator {
 	}
 
 	public void stop() {
-//		for (final Statemachine sm : rootStatemachines){
-//			TransactionalEditingDomain editingDomain = TransactionUtil.getEditingDomain(sm);
-//			editingDomain.getCommandStack().execute(
-//				new RecordingCommand(editingDomain){
-//					@Override
-//					protected void doExecute() {
-//						sm.getAttributes().removeKey("ac.soton.eventb.statemachines.animation2");
-//					}	
-//				}
-//			);
-//		}
 		machine = null;
 		rootStatemachines.clear();
 		bms = false;
