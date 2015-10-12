@@ -126,6 +126,18 @@ public class DiagramAnimator {
 //		}
 	}
 	
+	public boolean start(Machine machine, Trace trace, List<Statemachine> rootStatemachines, List<IFile> bmsFiles) {
+		this.machine = machine;
+		this.rootStatemachines = rootStatemachines;
+		this.trace = trace;
+		
+		Injector injector = Main.getInjector();
+		selector = injector.getInstance(AnimationSelector.class);
+		selector.clearUnprotected();
+		selector.registerAnimationChangeListener(animationListener);
+
+		return true;
+	}
 	
 	private boolean startProB2(IEventBRoot rootElement) {
 		VersionController.ensureInstalled();

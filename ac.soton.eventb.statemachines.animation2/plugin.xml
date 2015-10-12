@@ -27,7 +27,7 @@
             allPopups="true"
             locationURI="toolbar:ac.soton.eventb.emf.diagrams.toolbar?after=animations">
          <command
-               commandId="ac.soton.eventb.statemachines.animation.AnimateAction"
+               commandId="ac.soton.eventb.statemachines.animation2.AnimateAction"
                icon="icons/Animate.png"
                style="push">
             <visibleWhen
@@ -41,7 +41,7 @@
             </visibleWhen>
          </command>
          <command
-               commandId="ac.soton.eventb.statemachines.animation.StopAction"
+               commandId="ac.soton.eventb.statemachines.animation2.StopAction"
                icon="icons/StopAnimation.png"
                style="push">
             <visibleWhen
@@ -60,12 +60,12 @@
          point="org.eclipse.ui.commands">
       <command
             description="%command.description.animate"
-            id="ac.soton.eventb.statemachines.animation.AnimateAction"
+            id="ac.soton.eventb.statemachines.animation2.AnimateAction"
             name="%command.name.run">
       </command>
       <command
             description="%command.description.stop"
-            id="ac.soton.eventb.statemachines.animation.StopAction"
+            id="ac.soton.eventb.statemachines.animation2.StopAction"
             name="%command.name.stop">
       </command>
    </extension>
@@ -73,7 +73,7 @@
          point="org.eclipse.ui.handlers">
       <handler
             class="ac.soton.eventb.statemachines.animation2.actions.AnimateAction"
-            commandId="ac.soton.eventb.statemachines.animation.AnimateAction">
+            commandId="ac.soton.eventb.statemachines.animation2.AnimateAction">
          <activeWhen>
             <with
                   variable="ac.soton.eventb.statemachines.animation2.state">
@@ -85,7 +85,7 @@
       </handler>
       <handler
             class="ac.soton.eventb.statemachines.animation2.actions.StopAction"
-            commandId="ac.soton.eventb.statemachines.animation.StopAction">
+            commandId="ac.soton.eventb.statemachines.animation2.StopAction">
          <activeWhen>
             <with
                   variable="ac.soton.eventb.statemachines.animation2.state">
