@@ -2,7 +2,7 @@
 <feature
       id="ac.soton.eventb.statemachines.animation2.feature"
       label="%featureName"
-      version="0.0.2"
+      version="0.0.2.qualifier"
       provider-name="%providerName"
       plugin="ac.soton.iumlb.branding">
 
@@ -23,8 +23,6 @@
    </url>
 
    <requires>
-      <import feature="de.prob2.feature" version="3.0.7.201411260843" match="compatible"/>
-      <import feature="ac.soton.eventb.statemachines.feature" version="3.0.0" match="compatible"/>
       <import plugin="org.eclipse.core.runtime" version="3.7.0" match="compatible"/>
       <import plugin="org.eclipse.ui.ide" version="3.7.0" match="compatible"/>
       <import plugin="org.eclipse.gmf.runtime.diagram.ui" version="1.5.0" match="compatible"/>
@@ -39,6 +37,8 @@
       <import plugin="org.eclipse.gmf.runtime.diagram.ui.resources.editor" version="1.7.0" match="compatible"/>
       <import plugin="de.prob2.kernel.bundle" version="1.0.0" match="compatible"/>
       <import plugin="de.prob2.ui.eclipse" version="1.0.0" match="compatible"/>
+      <import feature="de.prob2.feature" version="3.0.7.201411260843" match="compatible"/>
+      <import feature="ac.soton.eventb.statemachines.feature" version="3.0.0" match="compatible"/>
    </requires>
 
    <plugin
