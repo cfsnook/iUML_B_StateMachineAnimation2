@@ -2,9 +2,9 @@
 <feature
       id="ac.soton.eventb.statemachines.animation2.feature"
       label="%featureName"
-      version="0.0.2.qualifier"
+      version="0.0.3.qualifier"
       provider-name="%providerName"
-      plugin="ac.soton.iumlb.branding">
+      plugin="ac.soton.eventb.statemachines.animation2.branding">
 
    <description url="http://www.example.com/description">
       %description
@@ -37,7 +37,6 @@
       <import plugin="org.eclipse.gmf.runtime.diagram.ui.resources.editor" version="1.7.0" match="compatible"/>
       <import plugin="de.prob2.kernel.bundle" version="1.0.0" match="compatible"/>
       <import plugin="de.prob2.ui.eclipse" version="1.0.0" match="compatible"/>
-      <import feature="de.prob2.feature" version="3.0.7.201411260843" match="compatible"/>
       <import feature="ac.soton.eventb.statemachines.feature" version="3.0.0" match="compatible"/>
    </requires>
 
@@ -47,5 +46,11 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="ac.soton.eventb.statemachines.animation2.branding"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>
