@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: ac.soton.eventb.statemachines.animation2.branding
+Bundle-Version: 0.0.1.qualifier
+Bundle-Vendor: %pluginVendor
+Bundle-Localization: plugin
