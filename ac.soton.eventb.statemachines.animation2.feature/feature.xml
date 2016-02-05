@@ -2,7 +2,7 @@
 <feature
       id="ac.soton.eventb.statemachines.animation2.feature"
       label="%featureName"
-      version="0.0.3.qualifier"
+      version="0.0.3.release"
       provider-name="%providerName"
       plugin="ac.soton.eventb.statemachines.animation2.branding">
 
