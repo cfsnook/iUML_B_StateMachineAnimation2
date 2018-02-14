@@ -2,21 +2,19 @@
 <feature
       id="ac.soton.eventb.statemachines.animation2.feature"
       label="%featureName"
-      version="0.0.3.release"
-      provider-name="%providerName"
-      plugin="ac.soton.eventb.statemachines.animation2.branding">
+      version="0.0.4.qualifier"
+      provider-name="%featureVendor"
+      plugin="ac.soton.eventb.statemachines.animation2.branding"
+      license-feature="org.rodinp.license"
+      license-feature-version="1.0.0.release">
 
-   <description url="http://www.example.com/description">
-      %description
+   <description>
+      %featureDescription
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      %copyright
+   <copyright>
+      %featureCopyright
    </copyright>
-
-   <license url="%licenseURL">
-      %license
-   </license>
 
    <url>
       <update label="%updateSiteName" url="http://rodin-b-sharp.sourceforge.net/updates/site.xml"/>
@@ -28,16 +26,16 @@
       <import plugin="org.eclipse.gmf.runtime.diagram.ui" version="1.5.0" match="compatible"/>
       <import plugin="org.rodinp.core" version="1.7.0" match="compatible"/>
       <import plugin="org.eventb.core" version="3.0.0" match="compatible"/>
-      <import plugin="org.eventb.emf.core" version="4.0.0" match="compatible"/>
       <import plugin="ac.soton.eventb.emf.core.extension" version="4.0.0" match="compatible"/>
       <import plugin="ac.soton.eventb.emf.diagrams" version="4.0.1" match="compatible"/>
-      <import plugin="ac.soton.eventb.statemachines" version="3.1.0" match="compatible"/>
       <import plugin="ac.soton.eventb.statemachines.edit" version="2.1.0" match="compatible"/>
       <import plugin="ac.soton.eventb.statemachines.diagram" version="3.2.0" match="compatible"/>
       <import plugin="org.eclipse.gmf.runtime.diagram.ui.resources.editor" version="1.7.0" match="compatible"/>
       <import plugin="de.prob2.kernel.bundle" version="1.0.0" match="compatible"/>
       <import plugin="de.prob2.ui.eclipse" version="1.0.0" match="compatible"/>
       <import feature="ac.soton.eventb.statemachines.feature" version="3.0.0" match="compatible"/>
+      <import plugin="org.eventb.emf.core" version="5.0.0" match="compatible"/>
+      <import plugin="ac.soton.eventb.statemachines" version="4.0.0" match="compatible"/>
    </requires>
 
    <plugin
